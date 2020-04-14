@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "poc-api.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "poc-api.name" . }}
+    helm.sh/chart: {{ include "poc-api.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "poc-api.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "poc-api.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.server.port | default 8080 }}
+              protocol: TCP
+          env:
+            - name: "KAFKA_BOOTSTRAP_SERVERS"
+              value: "{{ .Values.kafka.bootstrapServers }}"
+            - name: "MONGO_HOST"
+              value: "{{ .Values.mongo.host }}"
+            - name: "MONGO_PORT"
+              value: "{{ .Values.mongo.port }}"
+          readinessProbe:
+            httpGet:
+              path: "/status"
+              port: http
+            initialDelaySeconds: {{ .Values.deployment.readinessProbe.initialDelaySeconds | default 60 }}
+            periodSeconds: 10
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: "/status"
+              port: http
+            initialDelaySeconds: {{ .Values.deployment.livenessProbe.initialDelaySeconds | default 60 }}
+            periodSeconds: 10
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 3
+          resources:
+      serviceAccountName: {{ include "poc-api.fullname" . }}

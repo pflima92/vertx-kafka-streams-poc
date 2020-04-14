@@ -1,0 +1,83 @@
+plugins {
+  id 'java'
+  id 'application'
+  id 'com.github.johnrengelman.shadow' version '5.0.0'
+  id 'com.google.cloud.tools.jib' version '2.1.0'
+}
+
+group = 'io.github.pflima92.poc'
+version = '1.0.0-SNAPSHOT'
+
+repositories {
+  mavenCentral()
+}
+
+ext {
+  vertxVersion = '3.9.0'
+  junitJupiterEngineVersion = '5.4.0'
+}
+
+application {
+  mainClassName = 'io.vertx.core.Launcher'
+}
+
+sourceCompatibility = '1.8'
+
+def mainVerticleName = 'io.github.pflima92.poc.MainVerticle'
+def watchForChange = 'src/**/*'
+def doOnChange = './gradlew classes'
+
+dependencies {
+  compileOnly 'org.projectlombok:lombok:1.18.12'
+  annotationProcessor 'org.projectlombok:lombok:1.18.12'
+  compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+  compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+
+  implementation "io.vertx:vertx-core:$vertxVersion"
+  implementation "io.vertx:vertx-kafka-client:$vertxVersion"
+  implementation "io.vertx:vertx-mongo-client:$vertxVersion"
+  implementation "io.vertx:vertx-web:$vertxVersion"
+
+  implementation "org.apache.kafka:kafka-streams:2.4.0"
+  implementation "org.apache.kafka:kafka_2.12:2.4.0"
+
+  testImplementation "io.vertx:vertx-junit5:$vertxVersion"
+  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitJupiterEngineVersion"
+  testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterEngineVersion"
+  testCompileOnly 'org.projectlombok:lombok:1.18.12'
+  testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
+}
+
+
+shadowJar {
+  classifier = 'fat'
+  manifest {
+    attributes 'Main-Verticle': mainVerticleName
+  }
+  mergeServiceFiles {
+    include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+  }
+}
+
+test {
+  useJUnitPlatform()
+  testLogging {
+    events 'PASSED', 'FAILED', 'SKIPPED'
+  }
+}
+
+run {
+  args = ['run', mainVerticleName, "--redeploy=$watchForChange", "--launcher-class=$mainClassName", "--on-redeploy=$doOnChange"]
+}
+
+jib {
+  to {
+    image = 'poc-api'
+  }
+  container {
+    jvmFlags = ['-XX:TieredStopAtLevel=1']
+    mainClass = 'io.vertx.core.Launcher'
+    args = ['run', mainVerticleName]
+    ports = ['8080']
+  }
+}

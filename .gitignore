@@ -1,0 +1,9 @@
+.gradle/
+.idea/
+gradle/
+passenger-api/build/
+passenger-processor/build/
+passenger-api/gradlew
+passenger-api/gradlew.bat
+gradlew
+gradlew.bat

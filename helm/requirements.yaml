@@ -1,0 +1,17 @@
+dependencies:
+-   name: mongodb
+    version: 5.5.0
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    condition: mongodb.enabled
+-   name: mongoclient
+    version: 0.1.0
+    repository: file://./charts/mongoclient    
+    condition: mongoclient.enabled
+-   name: poc-processor
+    version: 0.1.0
+    repository: file://./charts/poc-processor
+    condition: pocProcessor.enabled
+-   name: poc-api
+    version: 0.1.0
+    repository: file://./charts/poc-api
+    condition: pocApi.enabled

@@ -1,0 +1,37 @@
+# Default values for the chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: poc-processor
+  tag: latest
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+deployment:
+  readinessProbe:
+    initialDelaySeconds: 10
+  livenessProbe:
+    initialDelaySeconds: 300
+
+service:
+  type: NodePort
+  nodePorts:
+    http: "32080"
+
+ingress:
+  enabled: false
+
+server:
+  port: "8080"
+
+mongo:
+  host: passenger-flow-mongodb
+  port: 27017
+
+kafka:
+  bootstrapServers: eventing-cp-kafka:9092

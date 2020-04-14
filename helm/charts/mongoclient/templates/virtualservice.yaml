@@ -1,0 +1,27 @@
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "mongoclient.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ $fullName }}-virtualservice
+  labels:
+    app.kubernetes.io/name: {{ include "mongoclient.name" . }}
+    helm.sh/chart: {{ include "mongoclient.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  hosts:
+  - {{ .Values.ingress.host | default "*" }}
+  gateways:
+  - {{ .Values.ingress.gateway.name }}
+  http:
+  - match:
+    - uri:
+        prefix: '/'        
+    route:
+    - destination:
+        port:
+          number: 80
+        host: {{ $fullName }}
+{{- end }}

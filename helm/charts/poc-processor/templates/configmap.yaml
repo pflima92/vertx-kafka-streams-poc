@@ -1,0 +1,11 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "poc-processor.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "poc-processor.name" . }}
+    helm.sh/chart: {{ include "poc-processor.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  sample: "0.4.9"

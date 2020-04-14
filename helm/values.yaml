@@ -1,0 +1,33 @@
+mongodb:
+  enabled: true
+  # Auth Configuration
+  usePassword: true
+  mongodbRootPassword: root
+  mongodbDatabase: poc
+  mongodbUsername: poc
+  mongodbPassword: poc
+
+  # Expose NodePort Locally
+  service:
+    type: NodePort
+    nodePort: 31072
+
+  # Disable persitence when runnin locally
+  persistence:
+    enabled: false
+
+mongoclient:
+  enabled: true
+  service:
+    type: NodePort
+  ingress:
+    enabled: false
+
+
+poc-processor:
+  replicaCount: 3
+  enabled: true
+
+poc-api:
+  replicaCount: 3
+  enabled: true

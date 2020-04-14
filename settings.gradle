@@ -1,0 +1,4 @@
+rootProject.name = 'vertx-kafka-streams-poc'
+
+include ':passenger-api'
+include ':passenger-processor'
